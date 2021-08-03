@@ -20,7 +20,6 @@ class FlowRNNEncoder(nn.Module):
                                                  batch_first=True,
                                                  bidirectional=bidirectional,
                                                  dropout=dropout_p)
-#        print(self.rnn.state_dict().keys())
         if bidirectional:
             for a in ['weight_ih_l0', 'weight_hh_l0', 'weight_ih_l0_reverse', 'weight_hh_l0_reverse']:
                 torch.nn.init.xavier_normal(self.rnn.state_dict()[a])
@@ -60,17 +59,7 @@ class FlowRNNEncoder(nn.Module):
         if varied_length:
             outputs, lengths = pad_packed_sequence(outputs, batch_first=True)
             outputs = outputs[reverse_indices]
-#         if self.return_hidden:  #
-#             if varied_length:
-#                 if self.rnn_type.lower() == "lstm":
-#                     hidden = hidden[0]
-#                 hidden = hidden[-self.n_dirs:, :, :]
-#                 hidden = hidden.transpose(0, 1).contiguous()
-#                 hidden = hidden.view(hidden.size(0), -1)
-#                 hidden = hidden[reverse_indices]
-#                 print(hidden.size())
-#         else:
-#             hidden = None
+#         if self.return_ne
         return outputs
 
 class RNNEncoder(nn.Module):
@@ -91,7 +80,6 @@ class RNNEncoder(nn.Module):
                                                  batch_first=True,
                                                  bidirectional=bidirectional,
                                                  dropout=dropout_p)
-#        print(self.rnn.state_dict().keys())
         if bidirectional:
             for a in ['weight_ih_l0', 'weight_hh_l0', 'weight_ih_l0_reverse', 'weight_hh_l0_reverse']:
                 torch.nn.init.xavier_normal(self.rnn.state_dict()[a])
@@ -131,17 +119,7 @@ class RNNEncoder(nn.Module):
         if varied_length:
             outputs, lengths = pad_packed_sequence(outputs, batch_first=True)
             outputs = outputs[reverse_indices]
-#         if self.return_hidden:  #
-#             if varied_length:
-#                 if self.rnn_type.lower() == "lstm":
-#                     hidden = hidden[0]
-#                 hidden = hidden[-self.n_dirs:, :, :]
-#                 hidden = hidden.transpose(0, 1).contiguous()
-#                 hidden = hidden.view(hidden.size(0), -1)
-#                 hidden = hidden[reverse_indices]
-#                 print(hidden.size())
-#         else:
-#             hidden = None
+#         if self.return_hine
         return outputs, hidden
 
 

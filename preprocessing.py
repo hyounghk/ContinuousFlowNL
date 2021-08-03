@@ -28,8 +28,6 @@ def get_vidname2cnt_per_show(base_path):
     vidname2cnt = {}
     for ele in tqdm(subdirs):
         cur_subdir_path = os.path.join(base_path, ele)
-        # cur_files = [name for name in os.listdir(cur_subdir_path) 
-        #              if os.path.isfile(os.path.join(cur_subdir_path, name))]
         cur_files = glob.glob(os.path.join(cur_subdir_path, "*jpg"))
         vidname2cnt[ele] = len(cur_files)
     return vidname2cnt

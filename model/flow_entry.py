@@ -36,9 +36,7 @@ class LangFlow(nn.Module):
     
     
     def get_conditional(self, flow, q, q_l=None, a0=None, a0_l=None, a1=None, a1_l=None, a2=None, a2_l=None, a3=None, a3_l=None, a4=None, a4_l=None, sub=None, sub_l=None, vcpt=None, vcpt_l=None, vid=None, vid_l=None):
-#         print(q_l, q)
         x_q = flow.embedding(q)
-#         x_q += torch.normal(mean=torch.zeros_like(x_q), std=torch.ones_like(x_q) * (1. / 256.))
         if self.trainable_paddings:
             pad_indexes = (q==0)
             x_q[pad_indexes] = flow.flow_padding.repeat(x_q[pad_indexes].size(0), 1)
@@ -56,7 +54,6 @@ class LangFlow(nn.Module):
         z_sample = []
         for z in flow_z:
             z_new = torch.empty(z.size()).normal_(mean=0,std=1.15)
-#             torch.randn(z.size()) * temperature
             z_sample.append(z_new[:show_size].cuda())
         return z_sample
         

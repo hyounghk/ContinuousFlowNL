@@ -291,7 +291,6 @@ def preprocess_inputs(batched_data, max_sub_l, max_vcpt_l, max_vid_l, device="cu
         elif k in tokens:
             model_in_list.extend([v])
         else:
-#             print(v)
             model_in_list.extend([v[0].to(device), v[1].to(device)])
     target_data = getattr(batched_data, label_key)
     target_data = target_data.to(device)

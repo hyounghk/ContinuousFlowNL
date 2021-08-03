@@ -38,13 +38,9 @@ class BeamSearcher(object):
         return sorted(hypotheses, key=lambda h: h.avg_log_prob, reverse=True)
 
     def beam_search(self, model, model_inputs, dset, idx=0, beam_size=5, return_tokens=False, max_decode_steps=40, min_decode_steps=8, keep_beams=False, early_stop=True, expand_size=2, max_eos = 100):
-#         print(max_eos)
+
         model_inputs = [temp[idx:idx+1] for temp in model_inputs[:12]]
-        # forward encoder
-#         max_decode_steps = model_inputs[0].size(1)-1
-        model.beam_size = beam_size
-#         self.model.get_conditional(*model_inputs)
-#         self.model.encode()        
+        model.beam_size = beam_size     
         init_states, init_context = model.init_states, model.init_context
         h, c = init_states[0][:, idx], init_states[1][:, idx]  # [2, b, d] but b = 1
 
@@ -96,6 +92,7 @@ class BeamSearcher(object):
                 h = hypotheses[i]
                 state_i = (h_state[:, i, :], c_state[:, i, :])
                 context_i = context_vector[i]
+
                 for j in range(beam_size*expand_size):
                     new_h = h.extend(token=top_k_ids[i][j].item(),
                                      log_prob=top_k_log_probs[i][j].item(),
@@ -114,6 +111,7 @@ class BeamSearcher(object):
                 if len(hypotheses) == beam_size or len(results) == beam_size:
                     break
             num_steps += 1
+
         if len(results) == 0:
             results = hypotheses
         if len(results) < beam_size:

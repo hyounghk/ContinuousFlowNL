@@ -66,14 +66,6 @@ class embedding_linear(nn.Module):
         self.w_s_r = nn.Parameter(logabs(w_s_r))
         self.w_u_r = nn.Parameter(w_u_r)
         
-#         weight = torch.randn(in_channel, in_channel)
-#         q, _ = torch.qr(weight)
-#         self.weight = nn.Parameter(q)
-        
-#         weight_r = torch.randn(in_channel, in_channel)
-#         q, _ = torch.qr(weight)
-#         self.weight_r = nn.Parameter(q)
-
     def calc_weight(self):
         weight = (
             self.w_p
@@ -85,7 +77,6 @@ class embedding_linear(nn.Module):
             @ (self.w_l_r * self.l_mask_r + self.l_eye_r)
             @ ((self.w_u_r * self.u_mask_r) + torch.diag(self.s_sign_r * torch.exp(self.w_s_r)))
         )
-#         print(weight.size())
         return weight, weight_r   
         
         
@@ -99,9 +90,6 @@ class embedding_linear(nn.Module):
                         
         logdet = torch.sum(torch.log(s).view(coup_a.shape[0], -1), 1) + torch.sum(self.w_s) + torch.sum(self.w_s_r)
         
-#         + torch.slogdet(self.weight.squeeze().double())[1].float()\
-#          + torch.slogdet(self.weight_r.squeeze().double())[1].float()
-
         return out_b, logdet
     
     def reverse(self, coup_a, coup_b):
@@ -320,9 +308,6 @@ class Attention(nn.Module):
         scores = torch.matmul(query, key.transpose(-2, -1)) \
                  / math.sqrt(query.size(-1))
 
-#         if mask is not None:
-#             scores = scores.masked_fill(mask == 0, -1e9)
-
         p_attn = F.softmax(scores, dim=-1)
 
         return torch.matmul(p_attn, value)
@@ -347,7 +332,6 @@ class MultiHeadedAttention(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, query, key, value, mask=None):
-#         print(key.size())
         batch_size = query.size(0)
 
         # 1) Do all the linear projections in batch from d_model => h x d_k
@@ -360,7 +344,6 @@ class MultiHeadedAttention(nn.Module):
         # 3) "Concat" using a view and apply a final linear.
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)
         x = self.output_linear(x)
-#         print(x.size())
         return x
     
     
@@ -373,7 +356,6 @@ class SublayerConnection(nn.Module):
     def __init__(self, size):
         super(SublayerConnection, self).__init__()
         self.norm = LayerNorm(size)
-#         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer):
         "Apply residual connection to any sublayer with the same size."
@@ -418,7 +400,6 @@ class ActNorm(nn.Module):
         
         self.register_buffer('initialized', torch.tensor(0, dtype=torch.uint8))
         self.logdet = logdet
-#         print(in_channel)
     def initialize(self, input):
         with torch.no_grad():
             flatten = input.permute(2, 0, 1).contiguous().view(input.shape[2], -1)
@@ -438,7 +419,6 @@ class ActNorm(nn.Module):
 
     def forward(self, input):
         _, seq_length, _ = input.shape
-#         print(input.shape)
         if self.initialized.item() == 0:
             self.initialize(input)
             self.initialized.fill_(1)
@@ -626,10 +606,6 @@ class Flow(nn.Module):
 
         else:
             self.invconv = InvConv1d(in_seqlen)
-#         if use_recurrent:
-#             self.coupling = RecurrentCoupling(in_channel, in_channel)  
-#         else:
-#             
         self.coupling = AffineCoupling(in_channel, affine=affine, use_transformer=use_transformer, use_recurrent=use_recurrent)
 
     def forward(self, input, inputs_length):

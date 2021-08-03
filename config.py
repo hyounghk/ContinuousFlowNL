@@ -101,12 +101,7 @@ class BaseOptions(object):
         if not self.initialized:
             self.initialize()
         opt = self.parser.parse_args()
-        
-#         if isinstance(self, TestOptions):
-#                 options = load_json(os.path.join("results", opt.model_dir, "opt.json"))
-#                 for arg in options:
-#                     setattr(opt, arg, options[arg])
-                    
+                            
         if opt.save_name:
             results_dir = opt.results_dir_base + opt.save_name           
             if not os.path.exists(results_dir):
@@ -115,7 +110,6 @@ class BaseOptions(object):
             opt.results_dir = results_dir
 
         opt.normalize_v = not opt.no_normalize_v
-#        opt.device = torch.device("cuda:%d" % opt.device if opt.device >= 0 else "cpu")
         opt.with_ts = not opt.no_ts
         opt.input_streams = [] if opt.input_streams is None else opt.input_streams
         opt.vid_feat_flag = True if "imagenet" in opt.input_streams else False

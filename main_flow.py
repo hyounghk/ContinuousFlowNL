@@ -87,7 +87,6 @@ def train(opt, dset, model, flow, criterions, optimizer, epoch, previous_best_lo
         optimizer[0].zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(flow.parameters(), 1.0)
-#         torch.nn.utils.clip_grad_value_(flow.parameters(), 5.0)
         optimizer[0].step()    
         
         train_loss+=[loss.item()]
@@ -117,7 +116,7 @@ def train(opt, dset, model, flow, criterions, optimizer, epoch, previous_best_lo
                 
             for i in range(len(sentenses)):                
                 print(sentenses[i])       
-#                 print('greedy:', sentenses_greedy[i])       
+       
             torch.set_grad_enabled(True)
             model.train()
             flow.train()
@@ -154,8 +153,7 @@ def validate(opt, dset, model, flow, beam, mode="valid", cos=None):
         
         flow_inputs, inputs_length = model.get_conditional(*model_inputs)
         log_p, logdet, flow_z, inputs = model.encode(flow, flow_inputs, inputs_length)
-#         for item in flow_z:
-#             print(item.mean(), item.var())
+
         if k == 0:
             reconstructed, logits = model.decode(flow, inputs, flow_z, True, 1, cos) 
             recon_error = torch.abs(reconstructed[0][:model_inputs[2][0]] - inputs[0][:model_inputs[2][0]]).mean()
@@ -223,7 +221,6 @@ if __name__ == "__main__":
     writer = SummaryWriter(opt.results_dir)
     opt.writer = writer
     z_sample = None
-#     z_sample = [torch.randn([3,300,128,1]).cuda() * 0.7, torch.randn([3,300,64,1]).cuda() * 0.7, torch.randn([3,600,32,1]).cuda() * 0.7]
     dset = TVQADataset(opt)
     opt.vocab_size = len(dset.word2idx)
     model = LangFlow(opt)             
@@ -245,7 +242,6 @@ if __name__ == "__main__":
     
     criterions = [EntropyLoss().cuda(), NLL().cuda()]
     optimizer = [torch.optim.Adam(filter(lambda p: p.requires_grad, flow.parameters()), lr=opt.lr)]
-#     [torch.optim.SGD(filter(lambda p: p.requires_grad, flow.parameters()), 1e-3, momentum=0.8)]
 
     if opt.restore_name:
         di=opt.results_dir_base+opt.restore_name+'/optimizer1.pth'
@@ -261,12 +257,8 @@ if __name__ == "__main__":
             # train for one epoch, valid per n batches, save the log and the best model
             cur_loss = train(opt, dset, model, flow, criterions, optimizer, epoch, best_loss, schedular, container1=save_numpy, container2=save_numpy_index, z_sample=z_sample, cos=cos)
             # remember best acc
-#             is_best = cur_loss < best_loss
             best_loss = min(cur_loss, best_loss)
-#             if not is_best:
-#                 early_stopping_cnt += 1
-#                 if early_stopping_cnt >= opt.max_es_cnt:
-#                     early_stopping_flag = True
+
         else:
             print("early stop with valid loss %.4f" % best_loss)
             opt.writer.export_scalars_to_json(os.path.join(opt.results_dir, "all_scalars.json"))
