@@ -70,34 +70,22 @@ class BeamSearcher(object):
             all_state_h = []
             all_state_c = []
             all_context = []
-#             all_xq_state_h = []
-#             all_xq_state_c = []
             
             for h in hypotheses:
                 state_h, state_c = h.state  # [num_layers, d]
                 all_state_h.append(state_h)
                 all_state_c.append(state_c)
                 all_context.append(h.context)
-#                 xq_state_h, xq_state_c = h.xq_state
-#                 all_xq_state_h.append(xq_state_h)
-#                 all_xq_state_c.append(xq_state_c)
 
             prev_h = torch.stack(all_state_h, dim=1)  # [num_layers, beam, d]
             prev_c = torch.stack(all_state_c, dim=1)  # [num_layers, beam, d]
             prev_context = torch.stack(all_context, dim=0)
             prev_states = (prev_h, prev_c)           
-#             if num_steps == 0:
-#                 prev_xq_states = None
-#             else:                
-#                 xq_prev_h = torch.stack(all_xq_state_h, dim=1)  # [num_layers, beam, d]
-#                 xq_prev_c = torch.stack(all_xq_state_c, dim=1)  # [num_layers, beam, d]
-#                 prev_xq_states = (xq_prev_h, xq_prev_c)
             
             logits, states, context_vector = model.decoder(prev_states, prev_context, prev_q, idx)
             if not early_stop:
                 all_logits.append(logits)
             h_state, c_state = states
-#             xq_h_state, xq_c_state = new_xq_states
             log_probs = F.log_softmax(logits, dim=1)
             top_k_log_probs, top_k_ids \
                 = torch.topk(log_probs, beam_size*expand_size, dim=-1)
@@ -108,7 +96,6 @@ class BeamSearcher(object):
                 h = hypotheses[i]
                 state_i = (h_state[:, i, :], c_state[:, i, :])
                 context_i = context_vector[i]
-#                 xq_state_i = (xq_h_state[:, i], xq_c_state[:, i])
                 for j in range(beam_size*expand_size):
                     new_h = h.extend(token=top_k_ids[i][j].item(),
                                      log_prob=top_k_log_probs[i][j].item(),
@@ -127,7 +114,6 @@ class BeamSearcher(object):
                 if len(hypotheses) == beam_size or len(results) == beam_size:
                     break
             num_steps += 1
-#         print(len(results))
         if len(results) == 0:
             results = hypotheses
         if len(results) < beam_size:
